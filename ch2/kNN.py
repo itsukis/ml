@@ -20,12 +20,9 @@ def classify0(inX, dataSet, labels, k):
 		voteILabel = labels[sortedDistIndices[i]]
 		classCount[voteILabel] = classCount.get(voteILabel, 0) + 1
 
-	print classCount
-
-
 	sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse = True)
 
-	return sortedClassCount, classCount
+	return int(sortedClassCount[0][0])
 
 
 def file2matrix(filename):
@@ -58,3 +55,22 @@ def autoNorm(dataSet):
 	normDataSet = normDataSet / tile(ranges, (m, 1))
 
 	return normDataSet, ranges, minVals
+
+
+def datingClassTest():
+	hoRatio = 0.10
+	datingDataMat, datingLabels = file2matrix("datingTestSet2.txt")
+	normMat, ranges, minVals = autoNorm(datingDataMat)
+	
+	m = normMat.shape[0]
+	numTestVecs = int(m * hoRatio)
+	errorCount = 0.0
+	for i in range(numTestVecs):
+		classifierResult = classify0(normMat[i,:], normMat[numTestVecs:m,:], datingLabels[numTestVecs:m], 3)
+		#print classifierResult, datingLabels[i]
+		print "the classifier came back with %d, the real answer is %d" % (classifierResult, int(datingLabels[i]))
+
+		if (classifierResult != int(datingLabels[i])):
+			errorCount += 1.0
+	
+	print "The total error rate is: %f" % (errorCount/float(numTestVecs))
