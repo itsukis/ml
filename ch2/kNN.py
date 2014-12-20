@@ -1,3 +1,4 @@
+from os import listdir
 from numpy import *
 import operator
 
@@ -74,3 +75,50 @@ def datingClassTest():
 			errorCount += 1.0
 	
 	print "The total error rate is: %f" % (errorCount/float(numTestVecs))
+
+def img2vector(filename):
+	returnVect = zeros((1, 1024))
+	fr = open(filename)
+	for i in range(32):
+		lineStr = fr.readline()
+		for j in range(32):
+			returnVect[0, i*32 + j] = int(lineStr[j])
+	return returnVect
+
+def handwritingClassTest():
+	
+	##
+	## Training Data Set
+	##
+	hwLables = []
+	trainingFileList = listdir('digits/trainingDigits')
+	m = len(trainingFileList)
+	trainingMat = zeros((m, 1024))
+
+	for i in range(m):
+		fileNameStr = trainingFileList[i]
+		fileStr = fileNameStr.split('.')[0]
+		classNumStr = int(fileStr.split('_')[0])
+		hwLables.append(classNumStr)
+		trainingMat[i, :] = img2vector('digits/trainingDigits/%s' % (fileNameStr))
+
+	##
+	## Test Data Set
+	##
+	testFileList = listdir('digits/testDigits')
+	mTest = len(testFileList)
+	errorCount = 0.0
+	
+	for i in range(mTest):
+		fileNameStr = testFileList[i]
+		fileStr = fileNameStr.split('.')[0]
+		classNumStr = int(fileStr.split('_')[0])
+		vectorUnderTest = img2vector('digits/testDigits/%s' % (fileNameStr))
+		classifierResult = classify0(vectorUnderTest, trainingMat, hwLables, 3)
+
+		print "the classifier came back with %d, the real answer is %d" % (classifierResult, classNumStr)
+
+		if (classifierResult != classNumStr): errorCount += 1.0
+
+	print "the total number of errors is %d" % errorCount
+	print "the total error rate is %f" % (errorCount/float(mTest))
